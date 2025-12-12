@@ -1,0 +1,5 @@
+.env
+Keys/
+*.log
+__pycache__/
+.vscode/
