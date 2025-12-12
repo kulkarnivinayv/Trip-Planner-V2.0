@@ -6,7 +6,6 @@ from fastapi import HTTPException
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 from dotenv import load_dotenv
-from sentence_transformers import SentenceTransformer
 import os
 import traceback
 
@@ -55,13 +54,30 @@ def count_tokens(text: str) -> int:
     # fallback rough estimate (1 token ≈ 4 chars)
     return max(1, int(len(text) / 4))
 
-# -----------------------------
-# Load heavy model ONCE (backend only)
-# -----------------------------
-# NOTE: use a reasonably sized model to keep memory low
-MODEL_NAME = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L12-v2")
-print("Loading sentence-transformers model:", MODEL_NAME)
-model = SentenceTransformer(MODEL_NAME)
+class GroqEmbeddingModel:
+    """
+    Lightweight cloud-based embedding model using Groq.
+    This avoids local model loading (fast startup, Render friendly).
+    """
+    def encode(self, text):
+        try:
+            from groq import Groq
+            groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+
+            response = client.embeddings.create(
+                model="text-embedding-3-small",  # light, fast, high-quality
+                input=text
+            )
+            return response.data[0].embedding
+
+        except Exception as e:
+            print("Groq embedding error:", e)
+            return []
+        
+print("Using Groq Embedding API (text-embedding-3-small)")
+model = GroqEmbeddingModel()
+
 
 class InsuranceQuoteRequest(BaseModel):
     destination: str
