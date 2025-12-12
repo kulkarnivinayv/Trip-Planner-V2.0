@@ -8,7 +8,7 @@ from starlette.responses import JSONResponse
 from dotenv import load_dotenv
 import os
 import traceback
-
+import groq
 from io import BytesIO
 from gtts import gTTS
 from deep_translator import GoogleTranslator
