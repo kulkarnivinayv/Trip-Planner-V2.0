@@ -21,3 +21,4 @@ python-docx
 deep-translator
 gTTS
 
+sentence-transformers
