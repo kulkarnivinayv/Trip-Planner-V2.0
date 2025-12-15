@@ -156,7 +156,7 @@ def estimate_tokens(text: str, model: str = "gpt-4o-mini"):
 # -----------------------------
 _stopwords = {
     "the","and","for","with","that","this","from","will","your","you","are",
-    "a","an","to","in","on","of","it","is","as","by","at","or","be","we"
+    "a","an","to","in","on","of","it","is","as","by","at","or","be","we", "but","not","have","has","if","all","our","more","about"
 }
 
 def normalize_text(s: str) -> str:
