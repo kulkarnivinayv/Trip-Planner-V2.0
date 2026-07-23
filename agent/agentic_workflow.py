@@ -36,7 +36,25 @@ class GraphBuilder():
         """Main agent function"""
         user_question = state["messages"]
         input_question = [self.system_prompt] + user_question
-        response = self.llm_with_tools.invoke(input_question)
+        try:
+            response = self.llm_with_tools.invoke(input_question)
+        except Exception as e:
+            # Groq (and other providers) can reject a malformed tool call
+            # outright (e.g. a required argument name the model got wrong),
+            # raising before any AIMessage is even produced. Retrying once
+            # with an explicit nudge about correct tool-call formatting
+            # recovers most of these without failing the whole request.
+            print(f"⚠️ llm_with_tools.invoke failed ({e}); retrying once with a corrective nudge")
+            nudge = {
+                "role": "user",
+                "content": (
+                    "Reminder: when calling any tool, use exactly the argument "
+                    "names defined in that tool's schema (for example, the place-"
+                    "search tools take a single argument named 'city'). Please "
+                    "retry your last step."
+                ),
+            }
+            response = self.llm_with_tools.invoke(input_question + [nudge])
         return {"messages": [response]}
     def build_graph(self):
         graph_builder=StateGraph(MessagesState)
